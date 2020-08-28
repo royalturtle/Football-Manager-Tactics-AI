@@ -1,0 +1,1 @@
+available_modes = ["TACTICS", "MATCHES", "TEST_TACTICS", "TEST_MATCHES"]
