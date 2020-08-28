@@ -20,8 +20,8 @@ class TestModel(AI_Base):
         ACT.act_move_to_statistics_window
     ]
 
-    def __init__(self, mode="TEST_TACTICS"):
+    def __init__(self, *args, **kwargs):
         _TPI(self, locals())
-        super().__init__()
+        super(TestModel, self).__init__(*args, **kwargs)
 
-        self.set_mode(mode)
+        self.set_mode(self.mode)

@@ -13,7 +13,11 @@ class Agent:
             assert name in available_networks, "Available : {} / Inp : {}".format(str(available_networks.keys()), name)
             return available_networks[name]
 
-        self.ai_network: AI_Base = get_network_available(ai_name)(mode)
+        self.ai_network: AI_Base = get_network_available(ai_name)(
+            mode=mode,
+            epochs=epochs,
+            players=players
+        )
 
     def run(self):
         _TPI(self, locals())

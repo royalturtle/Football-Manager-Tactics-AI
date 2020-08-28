@@ -18,7 +18,10 @@ def _TP(classname=None, functionname=None, inputs: dict = None, outputs=None):
             del inputs["self"]
 
         for key, val in inputs.items():
-            string += str(key) + ":" + str(val) + "/"
+            if type(val) is str:
+                string += str(key) + ":'" + val + "'/"
+            else:
+                string += str(key) + ":" + str(val) + "/"
         string += "}"
     elif outputs is not None:
         string += "  outputs : " + str(outputs)

@@ -7,21 +7,27 @@ class AI_Base:
     _scenario_tactics = list()
     _scenario_matches = list()
 
-    def __init__(self):
+    def __init__(self, mode=None, epochs=1, players=1):
         _TPI(self, locals())
+        assert mode is not None, "Running mode is not specified"
+
         self.scenario = list()
+        self.mode = mode
+        self.epochs = epochs
+        self.players = players
 
     def run(self):
         _TPI(self, locals())
         assert self.scenario is not None, "Empty Scenario"
-        for action in self.scenario:
-            if type(action).__name__ == "function":
-                func = action
-                func()
-            else:
-                func = action[0]
-                args = action[1]
-                func(**args)
+        for epoch in range(self.epochs):
+            for action in self.scenario:
+                if type(action).__name__ == "function":
+                    func = action
+                    func()
+                else:
+                    func = action[0]
+                    args = action[1]
+                    func(**args)
 
     def set_mode(self, mode):
         _TPI(self, locals())
