@@ -23,7 +23,29 @@ if __name__ == '__main__':
         dest="ai_model",
         help="""Select AI Models"""
     )
+    parser.add_argument(
+        "-e",
+        "--epochs",
+        default=1,
+        type=int,
+        dest="epochs",
+        help="""Count of Epochs"""
+    )
+    parser.add_argument(
+        "-p",
+        "--players",
+        default=1,
+        type=int,
+        dest="players",
+        help="""Number of Players"""
+    )
+
     args = parser.parse_args()
 
-    agent = Agent(args.ai_model, args.mode)
+    agent = Agent(
+        ai_name=args.ai_model,
+        mode=args.mode,
+        epochs=args.epochs,
+        players=args.players
+    )
     agent.run()

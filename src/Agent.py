@@ -4,7 +4,7 @@ from src.AIs.AI_Base import AI_Base
 
 
 class Agent:
-    def __init__(self, ai_name=None, mode=None):
+    def __init__(self, ai_name=None, mode=None, epochs=1, players=1):
         _TPI(self, locals())
         assert ai_name is not None, "You didn't select any ai model."
         assert mode is not None, "You didn't select any mode."

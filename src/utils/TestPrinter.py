@@ -14,7 +14,9 @@ def _TP(classname=None, functionname=None, inputs: dict = None, outputs=None):
 
     if inputs is not None:
         string += "  inputs {"
-        del inputs["self"]
+        if "self" in inputs.keys():
+            del inputs["self"]
+
         for key, val in inputs.items():
             string += str(key) + ":" + str(val) + "/"
         string += "}"
@@ -25,7 +27,11 @@ def _TP(classname=None, functionname=None, inputs: dict = None, outputs=None):
 
 
 def get_class_name(obj) -> str:
-    return obj.__class__.__name__
+    if type(obj) == str:
+        result = obj
+    else:
+        result = obj.__class__.__name__
+    return result
 
 
 def get_function_name() -> str:
