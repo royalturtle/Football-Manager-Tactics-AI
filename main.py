@@ -10,7 +10,7 @@ if __name__ == '__main__':
     parser.add_argument(
         "-m",
         "--mode",
-        default="TEST_TACTICS",
+        default=available_modes[0],
         choices=available_modes,
         dest="mode",
         help="""Running mode of AI ["TACTICS", "MATCHES", "TEST_TACTICS", "TEST_MATCHES"]"""
@@ -19,7 +19,7 @@ if __name__ == '__main__':
         "-a",
         "-ai",
         default="TestModel",
-        choices=available_networks.keys(),
+        choices=available_networks.keys()[0],
         dest="ai_model",
         help="""Select AI Models"""
     )

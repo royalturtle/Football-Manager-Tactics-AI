@@ -1,6 +1,7 @@
 import time
 import pyperclip
 import pyautogui
+
 from src.utils.MacroManager import MacroManager as MACRO
 from src.utils.TestPrinter import _TPI
 
@@ -79,12 +80,6 @@ class Actions:
             raise NotImplementedError("ERROR")
 
     @staticmethod
-    def act_multiple_change_tactics_and_run_instant_matches(players=1, is_test=False):
-        for i in range(players):
-            Actions.act_change_tactics(is_test)
-            Actions.act_run_instant_match(is_test)
-
-    @staticmethod
     def act_multiple_run_instant_matches(players=1, is_test=False):
         for i in range(players):
             Actions.act_run_instant_match(is_test)
@@ -102,3 +97,11 @@ class Actions:
             _TPI(CLASS_NAME, locals())
         else:
             raise NotImplementedError("ERROR")
+
+    @staticmethod
+    def act_get_lineup(is_test=False):
+        if is_test is True:
+            _TPI(CLASS_NAME, locals())
+        else:
+            raise NotImplementedError("ERROR")
+

@@ -1,1 +1,1 @@
-available_modes = ["TACTICS", "MATCHES", "TEST_TACTICS", "TEST_MATCHES"]
+available_modes = ["TEST_TACTICS", "TEST_MATCHES", "TESTING", "LEARN_FROM_FILE", "TACTICS", "MATCHES"]
