@@ -19,24 +19,28 @@ class AI_Base:
         self.mode = mode
         self.epochs = epochs
         self.players = players
+        self.is_testing_scenario = False
 
-    def run(self):
-        _TPI(self, locals())
-        assert self.scenario is not None, "Empty Scenario"
-        for epoch in range(self.epochs):
-            for action_set in self.scenario:
-                assert type(action_set).__name__ is "list" or "tuple", "Action set should be a list."
-                repeat = action_set[0]
-                actions = action_set[1:]
+    def run(self, scenario):
+        # _TPI(self, locals())
+        assert scenario is not None, "Empty Scenario"
+        assert type(scenario).__name__ is "list" or "tuple", "Action set should be a list."
+        repeat = scenario[0]
+        actions = scenario[1:]
 
-                for action in actions:
-                    if type(action).__name__ == "function":
-                        func = action
-                        func()
-                    else:
-                        func = action[0]
-                        args = action[1]
-                        func(**args)
+        for _ in range(repeat):
+            for action in actions:
+                if (type(action).__name__ == "function") or (type(action).__name__ =="method"):
+                    func = action
+                    args = dict(is_test=self.is_testing_scenario)
+                    func(**args)
+                elif type(action[0]).__name__ == "int":
+                    self.run(action)
+                else:
+                    func = action[0]
+                    args = action[1]
+                    args['is_test'] = self.is_testing_scenario
+                    func(**args)
 
     def set_mode(self, mode):
         _TPI(self, locals())
@@ -64,17 +68,21 @@ class AI_Base:
         if mode == "TACTICS":
             assert len(self._scenario_tactics) > 0, "Scenario of tactics is empty."
             set_scenario(self, self._scenario_tactics)
+            self.is_testing_scenario = False
         elif mode == "MATCHES":
             assert len(self._scenario_matches) > 0, "Scenario of matches is empty."
             set_scenario(self, self._scenario_matches)
+            self.is_testing_scenario = False
         elif mode == "TEST_TACTICS":
             assert len(self._scenario_tactics) > 0, "Scenario of tactics is empty."
-            test_actions: list = set_action_as_test(self._scenario_tactics)
-            set_scenario(self, test_actions)
+            # test_actions: list = set_action_as_test(self._scenario_tactics)
+            set_scenario(self, self._scenario_tactics)
+            self.is_testing_scenario = True
         elif mode == "TEST_MATCHES":
             assert len(self._scenario_matches) > 0, "Scenario of matches is empty."
-            test_actions: list = set_action_as_test(self._scenario_matches)
-            set_scenario(self, test_actions)
+            # test_actions: list = set_action_as_test(self._scenario_matches)
+            set_scenario(self, self._scenario_matches)
+            self.is_testing_scenario = True
         elif mode == "TESTING":
             raise NotImplementedError("NOT Implemented")
         elif mode == "LEARN_FROM_FILE":

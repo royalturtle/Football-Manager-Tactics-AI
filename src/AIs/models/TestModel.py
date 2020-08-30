@@ -8,7 +8,8 @@ class TestModel(AI_Base):
         _TPI(self, locals())
         super(TestModel, self).__init__(*args, **kwargs)
 
-        self._scenario_tactics = [
+        self._scenario_tactics = list([
+            self.epochs,
             [1, ACT.act_activate_window],
             [1, ACT.act_move_to_statistics_window],
             [self.players,
@@ -23,11 +24,11 @@ class TestModel(AI_Base):
             [1, self.act_ai_learn],
             [1, ACT.act_load_save_file],
             [1, ACT.act_wait_save_is_loaded],
-        ]
+        ])
 
-        self._scenario_matches = [
+        self._scenario_matches = list([
             ACT.act_activate_window,
             ACT.act_move_to_statistics_window
-        ]
+        ])
 
         self.set_mode(self.mode)

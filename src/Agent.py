@@ -21,4 +21,4 @@ class Agent:
 
     def run(self):
         _TPI(self, locals())
-        self.ai_network.run()
+        self.ai_network.run(self.ai_network.scenario)
