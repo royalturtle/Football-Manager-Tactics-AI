@@ -19,7 +19,7 @@ if __name__ == '__main__':
         "-a",
         "-ai",
         default="TestModel",
-        choices=available_networks.keys()[0],
+        choices=list(available_networks.keys())[0],
         dest="ai_model",
         help="""Select AI Models"""
     )
