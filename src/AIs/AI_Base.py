@@ -1,7 +1,7 @@
 import copy
 from src.utils.TestPrinter import _TPI
 from src.AIs.constant_modes import *
-from src.AIs.actor.environment import Environment
+from src.AIs.data.environment import Environment
 
 
 class AI_Base:
