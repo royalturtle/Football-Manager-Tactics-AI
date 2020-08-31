@@ -1,12 +1,13 @@
 from src.utils.TestPrinter import _TPI
 from src.AIs.AI_Base import AI_Base
-from src.AIs.env.actor.Actions import Actions as ACT
 
 
 class TestModel(AI_Base):
     def __init__(self, *args, **kwargs):
         _TPI(self, locals())
         super(TestModel, self).__init__(*args, **kwargs)
+
+        ACT = self.env.act
 
         self._scenario_tactics = list([
             [1, ACT.act_activate_window],

@@ -14,7 +14,7 @@ class AI_Base:
         _TPI(self, locals())
         assert mode is not None, "Running mode is not specified"
 
-        self.environment = Environment()
+        self.env = Environment()
         self.scenario = list()
         self.mode = mode
         self.epochs = epochs
