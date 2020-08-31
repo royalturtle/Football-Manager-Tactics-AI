@@ -1,6 +1,6 @@
 from src.utils.TestPrinter import _TPI
 from src.AIs.AI_Base import AI_Base
-from src.AIs.actor.Actions import Actions as ACT
+from src.AIs.env.actor.Actions import Actions as ACT
 
 
 class TestModel(AI_Base):

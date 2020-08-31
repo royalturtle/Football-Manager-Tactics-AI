@@ -2,7 +2,7 @@ import pandas as pd
 import copy
 
 
-from src.AIs.data.constant_game import constant_data
+from src.constants.constant_game import constant_data
 
 
 class InputManager:
@@ -10,7 +10,7 @@ class InputManager:
 
         self.data = copy.deepcopy(constant_data)
         for i, file in enumerate(files):
-            self.data[i]["data"] = pd.read_csv(files[i])
+            self.data[i]["env"] = pd.read_csv(files[i])
 
     def get_stats_by_ids(self):
         pass

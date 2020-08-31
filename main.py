@@ -1,8 +1,8 @@
 import argparse
 
 from src.Agent import Agent
-from src.AIs.constant_networks import *
-from src.AIs.constant_modes import *
+from src.constants.constant_networks import *
+from src.constants.constant_modes import *
 
 
 if __name__ == '__main__':

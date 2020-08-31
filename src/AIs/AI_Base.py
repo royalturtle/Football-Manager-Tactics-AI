@@ -1,7 +1,7 @@
 import copy
 from src.utils.TestPrinter import _TPI
-from src.AIs.constant_modes import *
-from src.AIs.data.environment import Environment
+from src.constants.constant_modes import *
+from src.AIs.env.environment import Environment
 
 
 class AI_Base:
@@ -25,22 +25,24 @@ class AI_Base:
         # _TPI(self, locals())
         assert scenario is not None, "Empty Scenario"
         assert type(scenario).__name__ is "list" or "tuple", "Action set should be a list."
-        repeat = scenario[0]
-        actions = scenario[1:]
 
-        for _ in range(repeat):
-            for action in actions:
-                if (type(action).__name__ == "function") or (type(action).__name__ =="method"):
-                    func = action
-                    args = dict(is_test=self.is_testing_scenario)
-                    func(**args)
-                elif type(action[0]).__name__ == "int":
-                    self.run(action)
-                else:
-                    func = action[0]
-                    args = action[1]
-                    args['is_test'] = self.is_testing_scenario
-                    func(**args)
+        for item in scenario:
+            if type(item).__name__ in ("function", "method"):
+                func = item
+                args = dict(is_test=self.is_testing_scenario)
+                func(**args)
+            elif type(item).__name__ in ("list", "tuple"):
+                self.run(item)
+            elif type(item).__name__ == "int":
+                action_set = scenario[1:]
+                for _ in range(item):
+                    self.run(action_set)
+                return
+            else:
+                func = item[0]
+                args = item[1]
+                args['is_test'] = self.is_testing_scenario
+                func(**args)
 
     def set_mode(self, mode):
         _TPI(self, locals())

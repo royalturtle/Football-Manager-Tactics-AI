@@ -1,5 +1,5 @@
 from src.utils.TestPrinter import _TPI
-from src.AIs.constant_networks import *
+from src.constants.constant_networks import *
 from src.AIs.AI_Base import AI_Base
 
 
