@@ -5,6 +5,11 @@ from PyQt5.QtWidgets import QMainWindow, QWidget, QHBoxLayout, QTabWidget, QVBox
 from PyQt5.QtGui import QIcon, QStandardItemModel
 from PyQt5 import QtSvg
 
+# for Graphs
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+
 
 class MyApp(QMainWindow):
     def __init__(self):
@@ -54,7 +59,6 @@ class MyApp(QMainWindow):
             my_team = QTableWidget(obj)
             my_team.setColumnCount(2)
             my_team.setHorizontalHeaderLabels(team_labels)
-            my_team.setFixedWidth(250)
             group_team_A_layout = QVBoxLayout(obj)
             group_team_A_layout.addWidget(my_team)
             group_team_A.setLayout(group_team_A_layout)
@@ -63,7 +67,6 @@ class MyApp(QMainWindow):
             your_team = QTableWidget(obj)
             your_team.setColumnCount(2)
             your_team.setHorizontalHeaderLabels(team_labels)
-            your_team.setFixedWidth(250)
             group_team_B_layout = QVBoxLayout(obj)
             group_team_B_layout.addWidget(your_team)
             group_team_B.setLayout(group_team_B_layout)
@@ -80,10 +83,28 @@ class MyApp(QMainWindow):
             left_layout.addWidget(group_team_B)
             left_layout.addLayout(team_act_layout)
             group_left.setLayout(left_layout)
+            group_left.setFixedWidth(250)
 
             # Right Screen
             group_right = QGroupBox("Output")
             right_layout = QVBoxLayout(obj)
+
+            # Right Screen 1
+            right_layout_1 = QHBoxLayout(obj)
+            result_list = QTableWidget(obj)
+            result_list.setColumnCount(5)
+            result_list.setHorizontalHeaderLabels(["", "Name", "Goal Difference", "GF", "GA"])
+            result_list.setFixedHeight(300)
+
+            # http://www.gisdeveloper.co.kr/?p=8343
+            fig = plt.Figure()
+            graph_view = FigureCanvas(fig)
+
+            right_layout_1.addWidget(result_list)
+            right_layout_1.addWidget(graph_view)
+
+            # Right Screen 2
+            right_layout_2 = QHBoxLayout(obj)
 
             svg_viewer = QtSvg.QSvgWidget(obj)
             path = os.getcwd()[:-6] + "\\ui\\rsc\\football ground.svg"
@@ -92,12 +113,15 @@ class MyApp(QMainWindow):
             svg_viewer.setGeometry(0, 0, 600, 600)
             svg_viewer.show()
 
-            right_layout.addWidget(svg_viewer)
+            right_layout_2.addWidget(svg_viewer)
+
+            right_layout.addLayout(right_layout_1)
+            right_layout.addLayout(right_layout_2)
             group_right.setLayout(right_layout)
 
 
             main_layout.addWidget(group_left)
-            main_layout.addLayout(group_right)
+            main_layout.addWidget(group_right)
 
             main_widget.setLayout(main_layout)
             obj.setCentralWidget(main_widget)
