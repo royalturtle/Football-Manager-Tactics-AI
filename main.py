@@ -3,6 +3,7 @@ import argparse
 from src.Agent import Agent
 from src.constants.constant_networks import *
 from src.constants.constant_modes import *
+from src.constants.constant_game import ConstantGame
 
 
 if __name__ == '__main__':
@@ -19,7 +20,7 @@ if __name__ == '__main__':
         "-a",
         "-ai",
         default="TestModel",
-        choices=list(available_networks.keys())[0],
+        choices=list(available_networks.keys()),
         dest="ai_model",
         help="""Select AI Models"""
     )
@@ -31,14 +32,6 @@ if __name__ == '__main__':
         dest="epochs",
         help="""Count of Epochs"""
     )
-    parser.add_argument(
-        "-p",
-        "--players",
-        default=1,
-        type=int,
-        dest="players",
-        help="""Number of Players"""
-    )
 
     args = parser.parse_args()
 
@@ -46,6 +39,6 @@ if __name__ == '__main__':
         ai_name=args.ai_model,
         mode=args.mode,
         epochs=args.epochs,
-        players=args.players
+        players=ConstantGame.count_teams()
     )
     agent.run()

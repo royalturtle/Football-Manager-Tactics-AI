@@ -9,6 +9,7 @@ class AI_Base:
     _scenario_matches = list()
     _scenario_learn_from_file = list()
     _scenario_test_ai = list()
+    _scenario_predict_data = list()
 
     def __init__(self, mode=None, epochs=1, players=1):
         _TPI(self, locals())
@@ -18,7 +19,7 @@ class AI_Base:
         self.scenario = list()
         self.mode = mode
         self.epochs = epochs
-        self.players = players
+        self.batches = players
         self.is_testing_scenario = False
 
     def run(self, scenario):
@@ -31,7 +32,7 @@ class AI_Base:
                 func = item
                 args = dict(is_test=self.is_testing_scenario)
                 func(**args)
-            elif type(item).__name__ in ("list", "tuple"):
+            elif type(item).__name__ in ("list"):
                 self.run(item)
             elif type(item).__name__ == "int":
                 action_set = scenario[1:]
@@ -88,9 +89,29 @@ class AI_Base:
         elif mode == "TESTING":
             raise NotImplementedError("NOT Implemented")
         elif mode == "LEARN_FROM_FILE":
-            raise NotImplementedError("NOT Implemented")
+            assert len(self._scenario_learn_from_file) > 0, "Scenario of 'learn from file' is empty."
+            set_scenario(self, self._scenario_learn_from_file)
+            self.is_testing_scenario = False
+        elif mode == "TEST_LEARN_FROM_FILE":
+            assert len(self._scenario_learn_from_file) > 0, "Scenario of 'learn from file' is empty."
+            set_scenario(self, self._scenario_learn_from_file)
+            self.is_testing_scenario = True
+        elif mode == "PREDICT_DATA":
+            raise NotImplementedError("NOT Implemeneted")
 
-    def act_get_players_data(self, is_test=False):
+    def act_save_match_result(self, is_test=False):
+        if is_test is True:
+            _TPI(self, locals())
+        else:
+            raise NotImplementedError("ERROR")
+
+    def act_get_players_data(self, data, is_test=False):
+        if is_test is True:
+            _TPI(self, locals())
+        else:
+            raise NotImplementedError("ERROR")
+
+    def act_register_data(self, data, is_test=False):
         if is_test is True:
             _TPI(self, locals())
         else:

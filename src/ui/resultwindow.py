@@ -10,9 +10,8 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
-
 class MyApp(QMainWindow):
-    def __init__(self):
+    def __init__(self, ai=None):
         super().__init__()
 
         def init_menu(obj):
@@ -72,8 +71,8 @@ class MyApp(QMainWindow):
             group_team_B.setLayout(group_team_B_layout)
 
             team_act_layout = QHBoxLayout(obj)
-            team_act_load_A = QPushButton("Load TeamA", obj)
-            team_act_load_B = QPushButton("Load TeamB", obj)
+            team_act_load_A = QPushButton("Load A", obj)
+            team_act_load_B = QPushButton("Load B", obj)
             team_act_result = QPushButton("Get Result", obj)
             team_act_layout.addWidget(team_act_load_A)
             team_act_layout.addWidget(team_act_load_B)
@@ -113,20 +112,25 @@ class MyApp(QMainWindow):
             svg_viewer.setGeometry(0, 0, 600, 600)
             svg_viewer.show()
 
+            tactics_tab = QTabWidget(obj)
+            tab1 = QWidget()
+            tab2 = QWidget()
+            tactics_tab.addTab(tab1, "Tab 1")
+            tactics_tab.addTab(tab2, "Tab 2")
+            tactics_tab.setFixedWidth(200)
+
             right_layout_2.addWidget(svg_viewer)
+            right_layout_2.addWidget(tactics_tab)
 
             right_layout.addLayout(right_layout_1)
             right_layout.addLayout(right_layout_2)
             group_right.setLayout(right_layout)
-
 
             main_layout.addWidget(group_left)
             main_layout.addWidget(group_right)
 
             main_widget.setLayout(main_layout)
             obj.setCentralWidget(main_widget)
-
-
 
         init_menu(self)
         init_ui(self)
@@ -143,8 +147,19 @@ class MyApp(QMainWindow):
         if action == act_new:
             print("do new action")
 
+from src.AIs.models.TestModel.TestModel import TestModel
 
-def run_ui():
+
+def run_ui(test_ai=False):
+    if test_ai is True:
+        ai = TestModel(
+            mode="TEST_TACTICS",
+            epochs=1,
+            players=1
+        )
+    else:
+        ai = None
+
     app = QApplication(sys.argv)
-    ex = MyApp()
+    ex = MyApp(ai)
     sys.exit(app.exec_())
