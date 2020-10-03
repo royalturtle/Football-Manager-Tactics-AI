@@ -137,7 +137,7 @@ class TabNetv2(AI_Base):
             self.ai.fit(
                 X_train=X_train, y_train=y_train,
                 X_valid=X_valid, y_valid=y_valid,
-                max_epochs=500,
+                max_epochs=1,
                 patience=500,
                 batch_size=512,
                 drop_last=False

@@ -1,7 +1,7 @@
-_project_path = "G:\\PHIL\\Coding\\PyCharm\\Project\\auto-football-tactics v2\\"
-
-_dir_match = _project_path + "matches\\"
-_dir_data = _project_path + "data\\"
+import os
+_project_path = str(os.getcwd())
+_dir_match = _project_path + "/matches/"
+_dir_data = _project_path + "/data/"
 _file_fd = _dir_data + "(v2.1) players stat (FD).csv"
 _file_gk = _dir_data + "(v2.1) players stat (FD).csv"
 

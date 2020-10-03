@@ -81,8 +81,6 @@ class TabNetv1(AI_Base):
                         #(self.act_register_data, dict(data=MATCH.act_get(is_flat=True))),
                          self.act_run_ai_with_learn,
                          self.act_test
-                         # self.act_ai_learn,
-                         # MATCH.act_next
                     ]
                 ],
             ]
@@ -120,14 +118,10 @@ class TabNetv1(AI_Base):
             X_valid = np.array(self.env.match_loader.valid_players)
             y_valid = np.array(self.env.match_loader.valid_target).reshape(-1, 1)
 
-            # X_train = np.array(X_train)
-            # X_valid = np.array(X_valid)
-            # y_train = np.array(y_train).reshape(-1, 1)
-            # y_valid = np.array(y_valid).reshape(-1, 1)
             self.ai.fit(
                 X_train=X_train, y_train=y_train,
                 X_valid=X_valid, y_valid=y_valid,
-                max_epochs=500,
+                max_epochs=1,
                 patience=500,
                 batch_size=512,
                 drop_last=False

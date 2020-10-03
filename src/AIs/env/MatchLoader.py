@@ -7,7 +7,7 @@ from src.utils.TestPrinter import _TPI
 
 
 class MatchLoader:
-    filepath = os.getcwd() + "\\matches\\"
+    filepath = os.getcwd() + "/matches/"
 
     def __init__(self):
         self.files = [f for f in listdir(self.filepath) if isfile(join(self.filepath, f))]
@@ -16,61 +16,67 @@ class MatchLoader:
         self.test_num = int(len(self.files) * 0.1)
 
         def set_trainset(obj):
-            obj.train_players = list()
-            obj.train_target = list()
-            obj.train_target2 = list()
+            _players = list()
+            target = list()
+            target2 = list()
 
             for i in range(0, len(obj)):
                 players, tactics, plus, minus = obj.act_get(ind=i, is_flat=True)
 
                 for data in players:
-                    obj.train_players.append(data)
+                    _players.append(data)
 
                 for data in plus:
-                    obj.train_target.append(data)
+                    target.append(data)
 
                 for data in minus:
-                    obj.train_target2.append(data)
+                    target2.append(data)
 
-        set_trainset(self)
+            return _players, target, target2
+
+        self.train_players, self.train_target, self.train_target2 = set_trainset(self)
 
         def set_validset(obj):
-            obj.valid_players = list()
-            obj.valid_target = list()
-            obj.valid_target2 = list()
+            _players = list()
+            _target = list()
+            _target2 = list()
 
             for i in range(len(obj), len(obj)+obj.test_num):
                 players, tactics, plus, minus = obj.act_get(ind=i, is_flat=True)
 
                 for data in players:
-                    obj.valid_players.append(data)
+                    _players.append(data)
 
                 for data in plus:
-                    obj.valid_target.append(data)
+                    _target.append(data)
 
                 for data in minus:
-                    obj.valid_target2.append(data)
+                    _target2.append(data)
 
-        set_validset(self)
+            return _players, _target, _target2
+
+        self.valid_players, self.valid_target, self.valid_target2 = set_validset(self)
 
         def set_testset(obj):
-            obj.test_players = list()
-            obj.test_target = list()
-            obj.test_target2 = list()
+            _players = list()
+            _target = list()
+            _target2 = list()
 
             for i in range(len(obj)+obj.test_num, len(obj.files)):
                 players, tactics, plus, minus = obj.act_get(ind=i, is_flat=True)
 
                 for data in players:
-                    obj.test_players.append(data)
+                    _players.append(data)
 
                 for data in plus:
-                    obj.test_target.append(data)
+                    _target.append(data)
 
                 for data in minus:
-                    obj.test_target2.append(data)
+                    _target2.append(data)
 
-        set_testset(self)
+            return _players, _target, _target2
+
+        self.test_players, self.test_target, self.test_target2 = set_testset(self)
 
     def act_next(self, is_test=False):
         if is_test is True:
@@ -84,12 +90,9 @@ class MatchLoader:
             _TPI(self, locals())
         else:
             if ind is None:
-                print("s : " + str(self.index))
                 filename = self.files[self.index]
             else:
-                print("i : " + str(ind))
                 filename = self.files[ind]
-            print(filename)
 
             with open(self.filepath + filename, 'r') as f:
                 data_list = json.load(f)
