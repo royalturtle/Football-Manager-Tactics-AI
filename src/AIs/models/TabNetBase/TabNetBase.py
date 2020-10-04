@@ -7,6 +7,7 @@ from sklearn.metrics import mean_squared_error
 from random import *
 import os
 
+
 class TabNetv1(AI_Base):
     file_path = os.getcwd() + "\\src\\AIs\\models\\TabNetv1\\"
     save_name = file_path + "garbage_model"
@@ -15,31 +16,18 @@ class TabNetv1(AI_Base):
         _TPI(self, locals())
         super(TabNetv1, self).__init__(*args, **kwargs)
 
-        col_nums = 36
-        player_nums = 22
+        ACT = self.env.act
+        MATCH = self.env.match_loader
 
-        cat_idxs = list()
-        cat_dims = list()
-        cat_emb_dim = list()
-        for i in range(22):
-            cat_idxs += [0 + i * col_nums, 1 + i * col_nums]
-            cat_dims += [2, 24]
-            cat_emb_dim += [1, 8]
-
-        self.cat_idxs = cat_idxs
-        self.cat_dims = cat_dims
-        self.cat_emb_dim = cat_emb_dim
+        self.cat_idxs, self.cat_dims, self.cat_emb_dim = MATCH.get_categorical()
 
         self.ai = TabNetRegressor(
             n_steps=10,
-            input_dim=col_nums * player_nums,
+            input_dim=MATCH.count_cols * MATCH.count_players,
             cat_dims=self.cat_dims,
             cat_emb_dim=self.cat_emb_dim,
             cat_idxs=self.cat_idxs
         )
-
-        ACT = self.env.act
-        MATCH = self.env.match_loader
 
         self._scenario_tactics = None
         self._scenario_matches = None
@@ -50,7 +38,7 @@ class TabNetv1(AI_Base):
                 [1,
                     # [len(MATCH),
                     [1,
-                        #(self.act_register_data, dict(data=MATCH.act_get(is_flat=True))),
+                        (self.act_register_data, dict(data=MATCH.act_get(is_flat=True))),
                          self.act_run_ai_with_learn,
                          self.act_test
                     ]
@@ -64,10 +52,12 @@ class TabNetv1(AI_Base):
         if is_test is True:
             _TPI(self, locals())
         else:
-            self.players = data[0]
-            self.tactics = data[1]
-            self.plus = data[2]
-            self.minus = data[3]
+            self.X_train = np.array(self.env.match_loader.train_players)
+            self.y_train = np.array(self.env.match_loader.train_target).reshape(-1, 1)
+            self.X_valid = np.array(self.env.match_loader.valid_players)
+            self.y_valid = np.array(self.env.match_loader.valid_target).reshape(-1, 1)
+            self.X_test = np.array(self.env.match_loader.test_players)
+            self.y_test = np.array(self.env.match_loader.test_target).reshape(-1, 1)
 
     def act_load_game(self):
         save = self.save_name + ".zip"
@@ -79,11 +69,8 @@ class TabNetv1(AI_Base):
         if is_test is True:
             _TPI(self, locals())
         else:
-            X_test = np.array(self.env.match_loader.test_players)
-            y_test = np.array(self.env.match_loader.test_target).reshape(-1, 1)
-
-            preds = self.ai.predict(X_test)
-            y_true = y_test
+            preds = self.ai.predict(self.X_test)
+            y_true = self.y_test
             test_score = mean_squared_error(y_pred=preds, y_true=y_true)
             print(test_score)
 
@@ -91,14 +78,9 @@ class TabNetv1(AI_Base):
         if is_test is True:
             _TPI(self, locals())
         else:
-            X_train = np.array(self.env.match_loader.train_players)
-            y_train = np.array(self.env.match_loader.train_target).reshape(-1, 1)
-            X_valid = np.array(self.env.match_loader.valid_players)
-            y_valid = np.array(self.env.match_loader.valid_target).reshape(-1, 1)
-
             self.ai.fit(
-                X_train=X_train, y_train=y_train,
-                X_valid=X_valid, y_valid=y_valid,
+                X_train=self.X_train, y_train=self.y_train,
+                X_valid=self.X_valid, y_valid=self.y_valid,
                 max_epochs=1,
                 patience=500,
                 batch_size=512,

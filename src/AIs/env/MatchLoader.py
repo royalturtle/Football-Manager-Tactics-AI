@@ -130,3 +130,24 @@ class MatchLoader:
     def __len__(self):
         # return len(self.files)
         return len(self.files) - 2 * self.test_num
+
+    @property
+    def count_cols(self):
+        return 36
+
+    @property
+    def count_players(self):
+        return 22
+
+    def get_categorical(self):
+        cat_idxs = list()
+        cat_dims = list()
+        cat_emb_dim = list()
+        for i in range(22):
+            cat_idxs += [0 + i *
+                         self.count_cols, 1 + i * self.count_cols]
+            cat_dims += [2, 24]
+            cat_emb_dim += [1, 8]
+
+        return cat_idxs, cat_dims, cat_emb_dim
+
