@@ -4,22 +4,21 @@ from src.AIs.env.tactics.tactics_inner import TacticsInner
 from pytorch_tabnet.tab_model import TabNetRegressor
 import numpy as np
 from sklearn.metrics import mean_squared_error
-from random import *
 import os
 
 
-class TabNetv1(AI_Base):
+class TabNetBase(AI_Base):
     file_path = os.getcwd() + "\\src\\AIs\\models\\TabNetv1\\"
     save_name = file_path + "garbage_model"
 
     def __init__(self, *args, **kwargs):
         _TPI(self, locals())
-        super(TabNetv1, self).__init__(*args, **kwargs)
+        super(TabNetBase, self).__init__(*args, **kwargs)
         ACT = self.env.act
         MATCH = self.env.match_loader
 
-        self.X_train, self.X_valid, self.X_test = None
-        self.y_train, self.y_valid, self.y_test = None
+        self.X_train, self.X_valid, self.X_test = None, None, None
+        self.y_train, self.y_valid, self.y_test = None, None, None
         self.cat_idxs, self.cat_dims, self.cat_emb_dim = MATCH.get_categorical()
         self.ai = None
 
@@ -56,24 +55,35 @@ class TabNetv1(AI_Base):
             self.X_test = np.array(self.env.match_loader.test_players)
             self.y_test = np.array(self.env.match_loader.test_target).reshape(-1, 1)
 
-    def act_init_ai(self):
-        MATCH = self.env.match_loader
-        self.ai = TabNetRegressor(
-            n_steps=10,
-            input_dim=MATCH.count_cols * MATCH.count_players,
-            cat_dims=self.cat_dims,
-            cat_emb_dim=self.cat_emb_dim,
-            cat_idxs=self.cat_idxs
-        )
+            print(self.y_train)
 
-    def act_modify_data(self):
-        pass
+    def act_init_ai(self, is_test=False):
+        if is_test is True:
+            _TPI(self, locals())
+        else:
+            MATCH = self.env.match_loader
+            self.ai = TabNetRegressor(
+                n_steps=10,
+                input_dim=MATCH.count_cols * MATCH.count_players,
+                cat_dims=self.cat_dims,
+                cat_emb_dim=self.cat_emb_dim,
+                cat_idxs=self.cat_idxs
+            )
 
-    def act_load_game(self):
-        save = self.save_name + ".zip"
-        if os.path.isfile(save):
-            print("Load Network")
-            self.ai.load_model(save)
+    def act_modify_data(self, is_test=False):
+        if is_test is True:
+            _TPI(self, locals())
+        else:
+            pass
+
+    def act_load_game(self, is_test=False):
+        if is_test is True:
+            _TPI(self, locals())
+        else:
+            save = self.save_name + ".zip"
+            if os.path.isfile(save):
+                print("Load Network")
+                self.ai.load_model(save)
 
     def act_test(self, is_test=False):
         if is_test is True:
