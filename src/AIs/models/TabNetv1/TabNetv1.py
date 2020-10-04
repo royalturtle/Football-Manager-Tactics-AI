@@ -7,4 +7,6 @@ class TabNetv1(TabNetBase):
         if is_test is True:
             _TPI(self, locals())
         else:
-            pass
+            self.y_train = self.y_train.reshape(-1, 1)
+            self.y_valid = self.y_train.reshape(-1, 1)
+            self.y_test = self.y_test.reshape(-1, 1)

@@ -49,13 +49,11 @@ class TabNetBase(AI_Base):
             _TPI(self, locals())
         else:
             self.X_train = np.array(self.env.match_loader.train_players)
-            self.y_train = np.array(self.env.match_loader.train_target).reshape(-1, 1)
+            self.y_train = np.array(self.env.match_loader.train_target)
             self.X_valid = np.array(self.env.match_loader.valid_players)
-            self.y_valid = np.array(self.env.match_loader.valid_target).reshape(-1, 1)
+            self.y_valid = np.array(self.env.match_loader.valid_target)
             self.X_test = np.array(self.env.match_loader.test_players)
-            self.y_test = np.array(self.env.match_loader.test_target).reshape(-1, 1)
-
-            print(self.y_train)
+            self.y_test = np.array(self.env.match_loader.test_target)
 
     def act_init_ai(self, is_test=False):
         if is_test is True:
@@ -101,7 +99,7 @@ class TabNetBase(AI_Base):
             self.ai.fit(
                 X_train=self.X_train, y_train=self.y_train,
                 X_valid=self.X_valid, y_valid=self.y_valid,
-                max_epochs=1,
+                max_epochs=self.epochs,
                 patience=500,
                 batch_size=512,
                 drop_last=False
