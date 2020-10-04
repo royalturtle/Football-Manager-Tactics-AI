@@ -15,19 +15,13 @@ class TabNetv1(AI_Base):
     def __init__(self, *args, **kwargs):
         _TPI(self, locals())
         super(TabNetv1, self).__init__(*args, **kwargs)
-
         ACT = self.env.act
         MATCH = self.env.match_loader
 
+        self.X_train, self.X_valid, self.X_test = None
+        self.y_train, self.y_valid, self.y_test = None
         self.cat_idxs, self.cat_dims, self.cat_emb_dim = MATCH.get_categorical()
-
-        self.ai = TabNetRegressor(
-            n_steps=10,
-            input_dim=MATCH.count_cols * MATCH.count_players,
-            cat_dims=self.cat_dims,
-            cat_emb_dim=self.cat_emb_dim,
-            cat_idxs=self.cat_idxs
-        )
+        self.ai = None
 
         self._scenario_tactics = None
         self._scenario_matches = None
@@ -39,6 +33,9 @@ class TabNetv1(AI_Base):
                     # [len(MATCH),
                     [1,
                         (self.act_register_data, dict(data=MATCH.act_get(is_flat=True))),
+                         self.act_modify_data,
+                         self.act_init_ai,
+                         # self.act_load_game,
                          self.act_run_ai_with_learn,
                          self.act_test
                     ]
@@ -59,6 +56,19 @@ class TabNetv1(AI_Base):
             self.X_test = np.array(self.env.match_loader.test_players)
             self.y_test = np.array(self.env.match_loader.test_target).reshape(-1, 1)
 
+    def act_init_ai(self):
+        MATCH = self.env.match_loader
+        self.ai = TabNetRegressor(
+            n_steps=10,
+            input_dim=MATCH.count_cols * MATCH.count_players,
+            cat_dims=self.cat_dims,
+            cat_emb_dim=self.cat_emb_dim,
+            cat_idxs=self.cat_idxs
+        )
+
+    def act_modify_data(self):
+        pass
+
     def act_load_game(self):
         save = self.save_name + ".zip"
         if os.path.isfile(save):
@@ -69,9 +79,9 @@ class TabNetv1(AI_Base):
         if is_test is True:
             _TPI(self, locals())
         else:
-            preds = self.ai.predict(self.X_test)
+            predictions = self.ai.predict(self.X_test)
             y_true = self.y_test
-            test_score = mean_squared_error(y_pred=preds, y_true=y_true)
+            test_score = mean_squared_error(y_pred=predictions, y_true=y_true)
             print(test_score)
 
     def act_run_ai_with_learn(self, is_test=False):
