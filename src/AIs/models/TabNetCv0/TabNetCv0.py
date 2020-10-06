@@ -14,7 +14,8 @@ class TabNetCv0(TabNetBase):
                 input_dim=MATCH.count_cols * MATCH.count_players,
                 cat_dims=self.cat_dims,
                 cat_emb_dim=self.cat_emb_dim,
-                cat_idxs=self.cat_idxs
+                cat_idxs=self.cat_idxs,
+                device_name='cuda'
             )
 
     def act_modify_data(self, is_test=False):

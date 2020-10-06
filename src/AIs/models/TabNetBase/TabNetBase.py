@@ -90,7 +90,11 @@ class TabNetBase(AI_Base):
             predictions = self.ai.predict(self.X_test)
             y_true = self.y_test
             test_score = mean_squared_error(y_pred=predictions, y_true=y_true)
+            np.savetxt("predict.txt", predictions, delimiter=',', fmt='%d')
+            np.savetxt("true.txt", y_true, delimiter=',', fmt='%d')
             print(test_score)
+            print(predictions[0])
+            print(y_true[0])
 
     def act_run_ai_with_learn(self, is_test=False):
         if is_test is True:
