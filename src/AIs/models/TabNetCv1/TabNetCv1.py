@@ -25,6 +25,7 @@ class TabNetCv1(TabNetBase):
             MATCH = self.env.match_loader
             for i in range(len(self.y_train)):
                 result = MATCH.train_plus[i] - MATCH.train_minus[i]
+
                 if result < 0:
                     result = 1
                 elif result > 0:
@@ -46,3 +47,4 @@ class TabNetCv1(TabNetBase):
                 elif result > 0:
                     result = 2
                 self.y_test[i] = result
+
