@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
+
 class MyApp(QMainWindow):
     def __init__(self, ai=None):
         super().__init__()
@@ -71,8 +72,8 @@ class MyApp(QMainWindow):
             group_team_B.setLayout(group_team_B_layout)
 
             team_act_layout = QHBoxLayout(obj)
-            team_act_load_A = QPushButton("Load A", obj)
-            team_act_load_B = QPushButton("Load B", obj)
+            team_act_load_A = QPushButton("Add A", obj)
+            team_act_load_B = QPushButton("Add B", obj)
             team_act_result = QPushButton("Get Result", obj)
             team_act_layout.addWidget(team_act_load_A)
             team_act_layout.addWidget(team_act_load_B)
