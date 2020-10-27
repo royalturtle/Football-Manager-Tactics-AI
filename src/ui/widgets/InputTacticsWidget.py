@@ -1,8 +1,8 @@
 from PyQt5.QtWidgets import QWidget, QMainWindow, QHBoxLayout, QTableWidget, QVBoxLayout, QGroupBox, QLabel, QLineEdit, \
     QGridLayout, QSizePolicy
 from PyQt5 import QtSvg
-from PyQt5.QtGui import QDrag
-from PyQt5.QtCore import Qt, QMimeData
+from PyQt5.QtGui import QDrag, QPixmap
+from PyQt5.QtCore import Qt, QMimeData, QPoint
 import os
 
 
@@ -88,10 +88,11 @@ class LineupIconsWidget(QWidget):
         assert lineup is not None
         super(LineupIconsWidget, self).__init__(parent)
         self.target = None
+        self.lineup = lineup
         self.setAcceptDrops(True)
         self.wg_position = list()
         for i in range(24):
-            # layout = QVBoxLayout()
+            layout = QVBoxLayout()
             item = QtSvg.QSvgWidget(self)
             if i == 0:
                 path = os.getcwd() + "\\src\\ui\\rsc\\players node keeper.svg"
@@ -101,16 +102,17 @@ class LineupIconsWidget(QWidget):
                 path = os.getcwd() + "\\src\\ui\\rsc\\players node empty.svg"
             item.load(path)
             item.setFixedSize(40, 40)
-            self.wg_position.append(item)
+            layout.addWidget(item)
+            self.wg_position.append(layout)
             item.show()
 
         self.ly_players = QGridLayout(self)
-        self.ly_players.addWidget(self.wg_position[0], 2, 0)
+        self.ly_players.addLayout(self.wg_position[0], 2, 0)
         for i in range(1, 21):
-            self.ly_players.addWidget(self.wg_position[i], (i - 1) % 5, (i - 1) // 5 + 1)
-        self.ly_players.addWidget(self.wg_position[21], 1, 5)
-        self.ly_players.addWidget(self.wg_position[22], 2, 5)
-        self.ly_players.addWidget(self.wg_position[23], 3, 5)
+            self.ly_players.addLayout(self.wg_position[i], (i - 1) % 5, (i - 1) // 5 + 1)
+        self.ly_players.addLayout(self.wg_position[21], 1, 5)
+        self.ly_players.addLayout(self.wg_position[22], 2, 5)
+        self.ly_players.addLayout(self.wg_position[23], 3, 5)
         self.setLayout(self.ly_players)
 
     def get_index(self, pos):
@@ -124,16 +126,19 @@ class LineupIconsWidget(QWidget):
         else:
             self.target = None
 
+    def mouseReleaseEvent(self, event):
+        self.target = None
+
     def mouseMoveEvent(self, event):
-        if event.buttons() & Qt.LeftButton and self.target is not None:
-            print(QDrag(self.ly_players.itemAt(self.target)))
+        if event.buttons() & Qt.LeftButton and self.target is not None and self.target in self.lineup:
             drag = QDrag(self.ly_players.itemAt(self.target))
             pix = self.ly_players.itemAt(self.target).itemAt(0).widget().grab()
             mimedata = QMimeData()
             mimedata.setImageData(pix)
             drag.setMimeData(mimedata)
             drag.setPixmap(pix)
-            drag.setHotSpot(event.pos())
+            to_middle = (pix.height() // 2)
+            drag.setHotSpot(QPoint(to_middle, to_middle))
             drag.exec_()
 
     def dragEnterEvent(self, event):
@@ -141,6 +146,18 @@ class LineupIconsWidget(QWidget):
             event.accept()
         else:
             event.ignore()
+
+    def dropEvent(self, event):
+        if not event.source().geometry().contains(event.pos()):
+            source = self.get_index(event.pos())
+            if source is None:
+                return
+
+            i, j = max(self.target, source), min(self.target, source)
+            p1, p2 = self.ly_players.getItemPosition(i), self.ly_players.getItemPosition(j)
+
+            self.ly_players.addItem(self.ly_players.takeAt(i), *p2)
+            self.ly_players.addItem(self.ly_players.takeAt(j), *p1)
 
 
 class LineupPictureWidget(QWidget):
