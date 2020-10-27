@@ -1,5 +1,8 @@
-from PyQt5.QtWidgets import QWidget, QMainWindow, QHBoxLayout, QTableWidget, QVBoxLayout, QGroupBox, QLabel, QLineEdit
+from PyQt5.QtWidgets import QWidget, QMainWindow, QHBoxLayout, QTableWidget, QVBoxLayout, QGroupBox, QLabel, QLineEdit, \
+    QGridLayout, QSizePolicy
 from PyQt5 import QtSvg
+from PyQt5.QtGui import QDrag
+from PyQt5.QtCore import Qt, QMimeData
 import os
 
 
@@ -65,27 +68,109 @@ class Player:
 
 
 class Lineup:
-    def __init__(self):
+    def __init__(self, formation=None):
         self.players = dict()
 
-        default_formation = [1, 2, 4, 5, 11, 12, 14, 15, 21, 23]
-        for item in default_formation:
+        if formation is None:
+            self.formation = [0, 1, 2, 4, 5, 11, 12, 14, 15, 21, 23]
+        else:
+            self.formation = formation
+
+        for item in self.formation:
             self.players[item] = Player()
+
+    def get_formation(self):
+        return self.formation
+
+
+class LineupIconsWidget(QWidget):
+    def __init__(self, parent=None, lineup: list = None):
+        assert lineup is not None
+        super(LineupIconsWidget, self).__init__(parent)
+        self.target = None
+        self.setAcceptDrops(True)
+        self.wg_position = list()
+        for i in range(24):
+            # layout = QVBoxLayout()
+            item = QtSvg.QSvgWidget(self)
+            if i == 0:
+                path = os.getcwd() + "\\src\\ui\\rsc\\players node keeper.svg"
+            elif i in lineup:
+                path = os.getcwd() + "\\src\\ui\\rsc\\players node.svg"
+            else:
+                path = os.getcwd() + "\\src\\ui\\rsc\\players node empty.svg"
+            item.load(path)
+            item.setFixedSize(40, 40)
+            self.wg_position.append(item)
+            item.show()
+
+        self.ly_players = QGridLayout(self)
+        self.ly_players.addWidget(self.wg_position[0], 2, 0)
+        for i in range(1, 21):
+            self.ly_players.addWidget(self.wg_position[i], (i - 1) % 5, (i - 1) // 5 + 1)
+        self.ly_players.addWidget(self.wg_position[21], 1, 5)
+        self.ly_players.addWidget(self.wg_position[22], 2, 5)
+        self.ly_players.addWidget(self.wg_position[23], 3, 5)
+        self.setLayout(self.ly_players)
+
+    def get_index(self, pos):
+        for i in range(self.ly_players.count()):
+            if self.ly_players.itemAt(i).geometry().contains(pos) and i != self.target:
+                return i
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.target = self.get_index(event.localPos().toPoint())
+        else:
+            self.target = None
+
+    def mouseMoveEvent(self, event):
+        if event.buttons() & Qt.LeftButton and self.target is not None:
+            print(QDrag(self.ly_players.itemAt(self.target)))
+            drag = QDrag(self.ly_players.itemAt(self.target))
+            pix = self.ly_players.itemAt(self.target).itemAt(0).widget().grab()
+            mimedata = QMimeData()
+            mimedata.setImageData(pix)
+            drag.setMimeData(mimedata)
+            drag.setPixmap(pix)
+            drag.setHotSpot(event.pos())
+            drag.exec_()
+
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasImage():
+            event.accept()
+        else:
+            event.ignore()
 
 
 class LineupPictureWidget(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, lineup: list = None):
+        assert lineup is not None
         super(LineupPictureWidget, self).__init__(parent)
+
         self.ly_main = QVBoxLayout(self)
 
         self.wg_position_viewer = QtSvg.QSvgWidget(self)
         path = os.getcwd() + "\\src\\ui\\rsc\\football ground.svg"
         self.wg_position_viewer.load(path)
-        self.wg_position_viewer.setGeometry(0, 0, 600, 600)
         self.wg_position_viewer.show()
+
+        self.wg_players = LineupIconsWidget(self, lineup)
+        self.auto_resize_table()
 
         self.ly_main.addWidget(self.wg_position_viewer)
         self.setLayout(self.ly_main)
+
+        self.setMinimumSize(400, 400)
+
+    def auto_resize_table(self):
+        overlay_pos = self.wg_position_viewer.geometry()
+        width = self.wg_position_viewer.geometry().width()
+        height = self.wg_position_viewer.geometry().height()
+        self.wg_players.setGeometry(overlay_pos.x(), overlay_pos.y(), width, height)
+
+    def resizeEvent(self, event):
+        self.auto_resize_table()
 
 
 class LabelAndInputWidget(QWidget):
@@ -120,6 +205,8 @@ class PlayerStatWidget(QWidget):
 class InputTacticsWidget(QMainWindow):
     def __init__(self, parent=None):
         super(InputTacticsWidget, self).__init__(parent)
+        self.lineup = Lineup()
+
         self.wg_main = QWidget(self)
         self.ly_main = QHBoxLayout(self)
 
@@ -129,7 +216,7 @@ class InputTacticsWidget(QMainWindow):
         self.ly_group_right = QVBoxLayout(self)
 
         self.wg_list_tactics = QTableWidget(self)
-        self.wg_lineup_picture = LineupPictureWidget(self)
+        self.wg_lineup_picture = LineupPictureWidget(self, self.lineup.get_formation())
         self.wg_player_stats = PlayerStatWidget(self)
 
         self.ly_group_left.addWidget(self.wg_list_tactics)
