@@ -38,6 +38,8 @@ class LineupManageWidget(QWidget):
         self.dg_input_tactics = InputTacticsWidget(self)
 
         self.ly_main = QVBoxLayout(self)
+        self.ly_main.setContentsMargins(0, 0, 0, 0)
+        self.ly_main.setSpacing(0)
 
         self.wg_group_team_a = LineupListWidget(self)
         self.wg_group_team_b = LineupListWidget(self)
