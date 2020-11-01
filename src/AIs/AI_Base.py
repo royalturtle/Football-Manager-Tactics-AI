@@ -14,10 +14,9 @@ class AI_Base:
     def __init__(self, mode=None, epochs=1, players=1):
         _TPI(self, locals())
         assert mode is not None, "Running mode is not specified"
-
+        self.mode = mode
         self.env = Environment()
         self.scenario = list()
-        self.mode = mode
         self.epochs = epochs
         self.batches = players
         self.is_testing_scenario = False

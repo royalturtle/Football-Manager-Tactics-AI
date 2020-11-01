@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QWidget, QMainWindow, QHBoxLayout, QTableWidget, QVBoxLayout, QGroupBox, QLabel, \
-    QLineEdit, QGridLayout, QPushButton, QFileDialog, QTableWidgetItem
+    QLineEdit, QGridLayout, QPushButton, QFileDialog, QTableWidgetItem, QAbstractItemView, QTableView
 from PyQt5 import QtSvg
 from PyQt5.QtGui import QDrag, QPixmap, QIcon
 from PyQt5.QtCore import Qt, QMimeData, QPoint
@@ -52,6 +52,43 @@ def list_as_formation_string(input: list = None):
     return result
 
 
+index_position = {
+    0: "GK",
+    1: "DR",
+    2: "DCR",
+    3: "DC",
+    4: "DCL",
+    5: "DL",
+    6: "WBR",
+    7: "WBCR",
+    8: "WBC",
+    9: "WBCL",
+    10: "WBL",
+    11: "MR",
+    12: "MCR",
+    13: "MC",
+    14: "MCL",
+    15: "ML",
+    16: "AMR",
+    17: "AMCR",
+    18: "AMC",
+    19: "AMCL",
+    20: "AML",
+    21: "STCR",
+    22: "STC",
+    23: "STCL",
+}
+
+
+def index_as_position_string(index: int = None):
+    assert input is not None
+    try:
+        return index_position[index]
+
+    except Exception as e:
+        print(e)
+
+
 class Player:
     def __init__(self):
         self.data = {
@@ -92,15 +129,27 @@ class Player:
             "r foot": 1,
         }
 
+    def get_data(self, col=None):
+        assert col is not None
+        return self.data[col]
+
     def set_data(self, input=None):
         columns = Stats.all()
         assert input is not None and len(input) == len(columns)
         for i in range(len(input)):
             self.data[columns[i]] = input[i]
 
+    def get_list_data(self):
+        columns = Stats.all()
+        result = list()
+        for col in columns:
+            result.append(self.get_data(col))
+        return result
+
+
 class Lineup:
     def __init__(self, formation=None, title: str = "Default"):
-        self.players = dict()
+        self.players = list()
         self.title = title
 
         if formation is None:
@@ -108,11 +157,20 @@ class Lineup:
         else:
             self.formation = formation
 
+        self.formation_string = list_as_formation_string(self.formation)
+
         for item in range(PLAYERS):
-            self.players[item] = Player()
+            self.players.append(Player())
 
     def get_formation(self):
         return self.formation
+
+    def get_list_data(self):
+        result = list()
+        for player in self.players:
+            stat = player.get_list_data()
+            result.append(stat)
+        return result
 
     def set_title(self, title):
         self.title = title
@@ -126,8 +184,7 @@ class Lineup:
                 self.formation[i] = data[i][0]
                 self.players[i].set_data(data[i])
 
-            print(self.players[10].data)
-            print(self.formation)
+            self.formation_string = list_as_formation_string(self.formation)
 
         except Exception as e:
             print(e)
@@ -255,6 +312,42 @@ class LabelAndInputWidget(QWidget):
         self.setFixedHeight(35)
 
 
+class PlayerStatGridWidget(QWidget):
+    def __init__(self, parent=None, lineup: Lineup = None):
+        assert lineup is not None
+        super(PlayerStatGridWidget, self).__init__(parent)
+        self.lineup = lineup
+
+        self.ly_main = QHBoxLayout(self)
+
+        self.wg_table = QTableWidget(self)
+        columns = Stats.all()
+        self.wg_table.setColumnCount(len(columns))
+        self.wg_table.setHorizontalHeaderLabels(columns)
+        self.wg_table.setFixedHeight(380)
+        self.wg_table.setFixedWidth(580)
+        self.wg_table.resizeColumnsToContents()
+
+        self.wg_table.setRowCount(PLAYERS)
+
+        self.setLayout(self.ly_main)
+        self.setFixedHeight(400)
+        self.setFixedWidth(600)
+
+    def set_data(self, data):
+        assert data is not None
+        columns = Stats.all()
+        try:
+            for i, player in enumerate(data):
+                item = QTableWidgetItem(index_as_position_string(player.get_data(columns[0])))
+                self.wg_table.setItem(i, 0, item)
+                for j, col in enumerate(columns[1:]):
+                    item = QTableWidgetItem(str(player.get_data(col)))
+                    self.wg_table.setItem(i, j+1, item)
+        except Exception as e:
+            print(e)
+
+
 class PlayerStatWidget(QWidget):
     def __init__(self, parent=None, lineup: Lineup = None):
         assert lineup is not None
@@ -290,9 +383,11 @@ class PlayerStatWidget(QWidget):
 
 
 class TacticsListWidget(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, tactics_list: list = None):
+        assert tactics_list is not None
         super(TacticsListWidget, self).__init__(parent)
-        self.tactics_list = list()
+        self.tactics_list = tactics_list
+        self.handler_item_dbclick = None
 
         self.ly_main = QVBoxLayout(self)
         self.ly_actions = QHBoxLayout(self)
@@ -320,12 +415,22 @@ class TacticsListWidget(QWidget):
         self.wg_list_tactics = QTableWidget(self)
         self.wg_list_tactics.setColumnCount(2)
         self.wg_list_tactics.setHorizontalHeaderLabels(["Name", "Formation"])
+        self.wg_list_tactics.setSelectionBehavior(QTableView.SelectRows)
+        self.wg_list_tactics.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.wg_list_tactics.doubleClicked.connect(self.double_click_handler)
 
         self.ly_main.addLayout(self.ly_actions)
         self.ly_main.addWidget(self.wg_list_tactics)
 
         self.setLayout(self.ly_main)
         self.setFixedWidth(250)
+
+    def double_click_handler(self):
+        row = self.wg_list_tactics.currentIndex().row()
+        self.handler_item_dbclick(row)
+
+    def set_double_click_handler(self, handler):
+        self.handler_item_dbclick = handler
 
     def load_tactics(self):
         filename = QFileDialog.getOpenFileName(self, 'Open File', os.getcwd() + "\\tactics", "CSV File (*.csv)")[0]
@@ -345,8 +450,11 @@ class TacticsListWidget(QWidget):
 
 
 class InputTacticsWidget(QMainWindow):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, lineup_list=None):
+        assert lineup_list is not None
         super(InputTacticsWidget, self).__init__(parent)
+        self.tactics_list = lineup_list
+        self.selected = None
         self.lineup = Lineup()
 
         self.wg_main = QWidget(self)
@@ -358,9 +466,10 @@ class InputTacticsWidget(QMainWindow):
         self.wg_group_right = QGroupBox("Modify Tactics", self)
         self.ly_group_right = QVBoxLayout(self)
 
-        self.wg_list_tactics = TacticsListWidget(self)
+        self.wg_list_tactics = TacticsListWidget(self, self.tactics_list)
         self.wg_lineup_picture = LineupPictureWidget(self, self.lineup.get_formation())
-        self.wg_player_stats = PlayerStatWidget(self, self.lineup)
+        self.wg_player_stats = PlayerStatGridWidget(self, self.lineup)
+        self.wg_list_tactics.set_double_click_handler(self.tactics_open_event)
 
         self.ly_group_left.addWidget(self.wg_list_tactics)
         self.ly_group_right.addWidget(self.wg_lineup_picture)
@@ -375,3 +484,6 @@ class InputTacticsWidget(QMainWindow):
         self.wg_main.setLayout(self.ly_main)
         self.setCentralWidget(self.wg_main)
 
+    def tactics_open_event(self, index):
+        self.selected = index
+        self.wg_player_stats.set_data(self.tactics_list[index].players)

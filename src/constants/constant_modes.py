@@ -5,5 +5,6 @@ available_modes = ["TEST_TACTICS",
                    "TEST_LEARN_FROM_FILE",
                    "TACTICS",
                    "MATCHES",
-                   "PREDICT_DATA"
+                   "PREDICT_DATA",
+                   "USAGE"
                    ]

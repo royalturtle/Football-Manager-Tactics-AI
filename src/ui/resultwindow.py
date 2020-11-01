@@ -1,16 +1,18 @@
 import sys
 import os
 from PyQt5.QtWidgets import QMainWindow, QWidget, QHBoxLayout, QTabWidget, QVBoxLayout, QGroupBox, \
-    QApplication, QMenu, QAction, qApp, QActionGroup, QLabel, QTreeView, QTableWidget, QPushButton
+    QApplication, QMenu, QAction, qApp, QActionGroup, QLabel, QTreeView, QTableWidget, QPushButton, QTableWidgetItem
 from PyQt5.QtGui import QIcon, QStandardItemModel
 from PyQt5 import QtSvg
 
-from src.ui.widgets.InputTacticsWidget import InputTacticsWidget
+from src.ui.widgets.InputTacticsWidget import InputTacticsWidget, Lineup
 
 # for Graphs
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+
+from src.AIs.models.TabNetCv1.TabNetCv1 import TabNetCv1
 
 
 class LineupListWidget(QWidget):
@@ -19,7 +21,7 @@ class LineupListWidget(QWidget):
         self.ly_main = QVBoxLayout(self)
 
         self.wg_group_team = QGroupBox(team_name)
-        self.team_labels = ["uid", "name"]
+        self.team_labels = ["Name", "Formation"]
         self.wg_list_team = QTableWidget(self)
         self.wg_list_team.setColumnCount(2)
         self.wg_list_team.setHorizontalHeaderLabels(self.team_labels)
@@ -30,12 +32,29 @@ class LineupListWidget(QWidget):
         self.ly_main.addWidget(self.wg_group_team)
         self.setLayout(self.ly_main)
 
+    def set_lineups(self, lineups):
+        try:
+            self.wg_list_team.setRowCount(len(lineups))
+
+            for row, lineup in enumerate(lineups):
+                item = QTableWidgetItem(os.path.basename(lineup.title))
+                self.wg_list_team.setItem(row, 0, item)
+                item = QTableWidgetItem(lineup.formation_string)
+                self.wg_list_team.setItem(row, 1, item)
+        except Exception as e:
+            print(e)
+
 
 class LineupManageWidget(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, lineup_lists=None, ai: TabNetCv1 = None, result_widget = None):
+        assert lineup_lists is not None and result_widget is not None
         super(LineupManageWidget, self).__init__(parent)
+        self.ai = ai
+        self.lineup_lists = lineup_lists
+        self.result_widget = result_widget
         # [UI] DIALOGUE
-        self.dg_input_tactics = InputTacticsWidget(self)
+        self.dg_input_tactics_A = InputTacticsWidget(self, lineup_lists[0])
+        self.dg_input_tactics_B = InputTacticsWidget(self, lineup_lists[1])
 
         self.ly_main = QVBoxLayout(self)
         self.ly_main.setContentsMargins(0, 0, 0, 0)
@@ -57,11 +76,38 @@ class LineupManageWidget(QWidget):
         self.ly_main.addLayout(self.ly_team_actions)
         self.setLayout(self.ly_main)
 
-        self.wg_button_manage_team_a.clicked.connect(self.show_dg_input_tactics)
+        self.wg_button_manage_team_a.clicked.connect(self.show_dg_input_tactics_A)
+        self.wg_button_manage_team_b.clicked.connect(self.show_dg_input_tactics_B)
+        self.wg_button_get_result.clicked.connect(self.calculate_result)
 
-    def show_dg_input_tactics(self):
-        print('a')
-        self.dg_input_tactics.show()
+        self.dg_input_tactics_A.closeEvent = self.close_dialogue_tactics_A
+        self.dg_input_tactics_B.closeEvent = self.close_dialogue_tactics_B
+
+    def show_dg_input_tactics_A(self):
+        self.dg_input_tactics_A.show()
+
+    def close_dialogue_tactics_A(self, event):
+        self.wg_group_team_a.set_lineups(self.lineup_lists[0])
+
+    def show_dg_input_tactics_B(self):
+        self.dg_input_tactics_B.show()
+
+    def close_dialogue_tactics_B(self, event):
+        self.wg_group_team_b.set_lineups(self.lineup_lists[1])
+
+    def calculate_result(self):
+        # self.ai.run(self.ai.scenario)
+        result = list()
+        averages = list()
+        for me in self.lineup_lists[0]:
+            sum = 0
+            for you in self.lineup_lists[1]:
+                win_prob = self.ai.get_result(me.get_list_data(), you.get_list_data())
+                sum += win_prob
+                result.append((os.path.basename(me.title), os.path.basename(you.title), win_prob))
+            averages.append(sum / len(self.lineup_lists[1]))
+
+        self.result_widget.update_result(result, averages, self.lineup_lists[0], self.lineup_lists[1])
 
 
 class TacticsResultWidget(QWidget):
@@ -75,11 +121,35 @@ class ResultListWidget(QWidget):
         self.ly_main = QVBoxLayout(self)
 
         self.wg_list_result = QTableWidget(self)
-        self.wg_list_result.setColumnCount(5)
-        self.wg_list_result.setHorizontalHeaderLabels(["", "Name", "Goal Difference", "GF", "GA"])
+        self.wg_list_result.setColumnCount(2)
+        self.wg_list_result.setHorizontalHeaderLabels(["Tactics", "Win Avg"])
 
         self.ly_main.addWidget(self.wg_list_result)
         self.setLayout(self.ly_main)
+
+    def update_result(self, result, averages, my_tactics, opponent_tactics):
+        try:
+            self.wg_list_result.setColumnCount(2 + len(opponent_tactics))
+            labels = ["Tactics", "Win Avg"]
+
+            for i in opponent_tactics:
+                labels.append(os.path.basename(i.title))
+
+            self.wg_list_result.setHorizontalHeaderLabels(labels)
+            self.wg_list_result.setRowCount(len(my_tactics))
+            for i in range(len(result)):
+
+                row = i // len(my_tactics)
+                col = i % len(opponent_tactics)
+
+                item = QTableWidgetItem(result[i][0])
+                self.wg_list_result.setItem(row, 0, item)
+                item = QTableWidgetItem(str(averages[row]))
+                self.wg_list_result.setItem(row, 1, item)
+                item = QTableWidgetItem(str(result[i][2]))
+                self.wg_list_result.setItem(row, 2 + col, item)
+        except Exception as e:
+            print(e)
 
 
 class LineupPictureWidget(QWidget):
@@ -102,9 +172,11 @@ class MyApp(QMainWindow):
         super().__init__()
 
         self.menubar = self.menuBar()
-        self.statusBar().showMessage('PyQt5 StatusBar')
+        self.ai = TabNetCv1(mode="LEARN_FROM_FILE", epochs=1)
 
-        self.dg_input_tactics = InputTacticsWidget(self)
+        self.lineupA = list()
+        self.lineupB = list()
+        self.statusBar().showMessage('PyQt5 StatusBar')
 
         def init_ui(obj: QMainWindow):
             wg_main = QWidget(obj)
@@ -113,7 +185,11 @@ class MyApp(QMainWindow):
             # Left Screen
             wg_group_left = QGroupBox("Input")
             ly_left = QHBoxLayout(obj)
-            wg_lineup_manager = LineupManageWidget(obj)
+
+            # tmp
+            wg_list_result = ResultListWidget()
+
+            wg_lineup_manager = LineupManageWidget(obj, (obj.lineupA, obj.lineupB), self.ai, wg_list_result)
             ly_left.addWidget(wg_lineup_manager)
             wg_group_left.setLayout(ly_left)
             wg_group_left.setFixedWidth(250)
@@ -124,15 +200,14 @@ class MyApp(QMainWindow):
 
             # Right Screen 1
             ly_right_1 = QHBoxLayout(obj)
-            wg_list_result = ResultListWidget()
             wg_list_result.setFixedHeight(300)
 
             # http://www.gisdeveloper.co.kr/?p=8343
-            fig = plt.Figure()
-            wg_result_graph = FigureCanvas(fig)
+            #fig = plt.Figure()
+            #wg_result_graph = FigureCanvas(fig)
 
             ly_right_1.addWidget(wg_list_result)
-            ly_right_1.addWidget(wg_result_graph)
+            #ly_right_1.addWidget(wg_result_graph)
 
             # Right Screen 2
             ly_right_2 = QHBoxLayout(obj)
