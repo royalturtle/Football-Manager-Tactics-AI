@@ -44,7 +44,8 @@ class TabNetNoEmbeddings(torch.nn.Module):
                  n_steps=3, gamma=1.3,
                  n_independent=2, n_shared=2, epsilon=1e-15,
                  virtual_batch_size=128, momentum=0.02,
-                 mask_type="sparsemax"):
+                 mask_type="sparsemax",
+                 count_of_row=22):
         """
         Defines main part of the TabNet network without the embedding layers.
         Parameters
@@ -89,6 +90,7 @@ class TabNetNoEmbeddings(torch.nn.Module):
         self.virtual_batch_size = virtual_batch_size
         self.mask_type = mask_type
         self.initial_bn = BatchNorm1d(self.input_dim, momentum=0.01)
+        self.count_of_row = count_of_row
 
         if self.n_shared > 0:
             shared_feat_transform = torch.nn.ModuleList()
