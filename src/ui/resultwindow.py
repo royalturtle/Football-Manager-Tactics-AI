@@ -1,7 +1,8 @@
 import sys
 import os
 from PyQt5.QtWidgets import QMainWindow, QWidget, QHBoxLayout, QTabWidget, QVBoxLayout, QGroupBox, \
-    QApplication, QMenu, QAction, qApp, QActionGroup, QLabel, QTreeView, QTableWidget, QPushButton, QTableWidgetItem
+    QApplication, QMenu, QAction, qApp, QActionGroup, QLabel, QTreeView, QTableWidget, QPushButton, QTableWidgetItem, \
+    QTableView, QAbstractItemView
 from PyQt5.QtGui import QIcon, QStandardItemModel
 from PyQt5 import QtSvg
 
@@ -123,6 +124,8 @@ class ResultListWidget(QWidget):
         self.wg_list_result = QTableWidget(self)
         self.wg_list_result.setColumnCount(2)
         self.wg_list_result.setHorizontalHeaderLabels(["Tactics", "Win Avg"])
+        self.wg_list_result.setSelectionBehavior(QTableView.SelectRows)
+        self.wg_list_result.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
         self.ly_main.addWidget(self.wg_list_result)
         self.setLayout(self.ly_main)
@@ -172,7 +175,9 @@ class MyApp(QMainWindow):
         super().__init__()
 
         self.menubar = self.menuBar()
-        self.ai = TabNetCv1(mode="LEARN_FROM_FILE", epochs=1)
+        self.ai:TabNetCv1 = TabNetCv1(mode="LEARN_FROM_FILE", epochs=1)
+        self.ai.act_init_ai()
+        self.ai.load_model()
 
         self.lineupA = list()
         self.lineupB = list()

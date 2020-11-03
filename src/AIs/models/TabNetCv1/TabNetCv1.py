@@ -62,6 +62,7 @@ class TabNetCv1(TabNetBase):
 
     def get_result(self, my_team:list, your_team:list):
         # tmp
+        '''
         MATCH = self.env.match_loader
         self.act_register_data(data=MATCH.act_get(is_flat=True))
         self.act_modify_data()
@@ -82,6 +83,7 @@ class TabNetCv1(TabNetBase):
             batch_size=512,
             drop_last=False
         )
+        '''
         try:
             x = list()
             for player in my_team:
