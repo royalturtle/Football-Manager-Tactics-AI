@@ -8,3 +8,6 @@
 
 발표 PPT 및 자료 URL
 ([Google Drive](https://drive.google.com/drive/u/0/folders/1Cx0Ltr_4dD6JdfOpaHdXjI_fFmDZfOwK))
+
+
+<img src="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2Fbke7mA%2FbtrFwSupO3m%2FsGvwk5TqnjWy9kQzXGvdz0%2Fimg.jpg"/>
